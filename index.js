@@ -7,7 +7,8 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 var tempData = require('./data.json');
-if (tempData == null) {
+if (tempData == null || tempData == undefined || tempData == "") {
+    console.log("Making new data")
     tempData = {
         users:[]
     }
@@ -15,6 +16,7 @@ if (tempData == null) {
     if (tempData.users == null) {
         tempData.users = [];
     }
+    saveData();
 }
 
 //save data
