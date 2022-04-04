@@ -29,6 +29,9 @@ async function saveData() {
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
 
+//public folder
+app.use(express.static(__dirname + '/public'));
+
 app.get('/', (req, res) => {
     res.render('countdown');
 });
