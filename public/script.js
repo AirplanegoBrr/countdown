@@ -1,124 +1,41 @@
-const dateMaker = document.getElementById('dateMaker');
-const countdowns = document.getElementById('countdowns');
-const main = document.getElementById('main');
-const add = document.getElementById('add');
-const form = document.getElementById('abc');
-const loginForm = document.getElementById('loginForm');
-const signupForm = document.getElementById('signupForm');
-const formInputs = form.elements;
-var socket = io();
-//wait 2 seconds
-socket.on('connect', function () {
-    console.log('Connected to server');
-});
-//when socket sends login message, show login form
-socket.on('login', (data) => {
-    console.log(data);
-    //set token in local storage
-    localStorage.setItem('token', data.token);
-    //reload page
-    location.reload();
-});
-socket.on('token', (data) => {
-    console.log(data)
-    if (data.status) {
-        loginForm.style.display = 'none';
-        signupForm.style.display = 'none';
-        main.style.display = 'block';
-    } else {
-        localStorage.setItem('token', null);
-        loginForm.style.display = 'block';
-        signupForm.style.display = 'none';
-        main.style.display = 'none';
-    }
-})
+//Grabing elements
+main = document.getElementById('main');
+loginForm = document.getElementById('loginForm');
+signupForm = document.getElementById('signupForm');
+
+//Main
+add = document.getElementById('add');
+countdowns = document.getElementById('countdowns');
+//Main end
+
+//Date maker
+dateMaker = document.getElementById('dateMaker');
+form = document.getElementById('abc');
+
+//Date end
+
+//Other
+formInputs = form.elements;
 var toggleShow = false
 var rawData = []
+var storedData = JSON.parse(localStorage.getItem('data'))
+//Other end
+
+console.log("[Main]: Grabbed all elements")
+
+//Make sure we dont show the maker
+dateMaker.style.display = 'none'
 
 //get stored data
-var storedData = JSON.parse(localStorage.getItem('data'))
 if (storedData) {
     rawData = storedData
 }
-var token = localStorage.getItem('token')
-dateMaker.style.display = 'none'
-//if no token
-if (token == "" || token == null) {
-    console.log('no token')
-    main.style.display = "none"
-    loginForm.style.display = "block"
-    signupForm.style.display = "none"
-} else {
-    console.log('token')
-    loginForm.style.display = "none"
-    signupForm.style.display = "none"
-    main.style.display = "none"
-    //wait 1 second 
-    setTimeout(() => {
-        console.log('Checking token')
-        socket.emit('token', {
-            token: token
-        })
-    }, 1000);
-}
 
-
+//Add our Listeners
 form.addEventListener("submit", formSubmit);
-document.getElementById("setTime").addEventListener("click", setTime);
 add.addEventListener("click", addNew);
+document.getElementById("setTime").addEventListener("click", setTime);
 
-loginForm.addEventListener("submit", login);
-signupForm.addEventListener("submit", signup);
-
-function login(e) {
-    e.preventDefault()
-    var submitter = e.submitter.defaultValue
-    console.log(submitter)
-    if (submitter == "Login") {
-        var username = loginForm.elements.username.value
-        var password = loginForm.elements.password.value
-        var data = {
-            username: username,
-            password: password
-        }
-        socket.emit('login', data)
-    } else if (submitter == "Register") {
-        loginForm.style.display = "none"
-        signupForm.style.display = "block"
-    }
-
-}
-function signup(e) {
-    e.preventDefault()
-    var submitter = e.submitter.defaultValue
-    if (submitter == "Login") {
-        loginForm.style.display = "block"
-        signupForm.style.display = "none"
-    } else if (submitter == "Signup") {
-        var username = signupForm.elements.username.value
-        var password = signupForm.elements.password.value
-        var password2 = signupForm.elements.password2.value
-        console.log(username, password, password2)
-        if (password != password2) {
-            alert("Passwords do not match")
-        } else {
-            var data = {
-                username: username,
-                password: password
-            }
-            socket.emit('signup', data)
-        }
-    }
-}
-
-function makeNewCountdown(name, date, time) {
-    var newCountdown = document.createElement('div');
-    newCountdown.className = 'countdown';
-    newCountdown.innerHTML = `<h1>${name}</h1>
-    <h2>${date}</h2>
-    <h2>${time}</h2>`;
-    countdowns.appendChild(newCountdown);
-}
 function addNew(e) {
     //console.log(e)
     if (toggleShow) {
@@ -131,6 +48,13 @@ function addNew(e) {
         toggleShow = true;
     }
 }
+function remove2(e){
+    //remove e element
+    e.remove()
+    rawData.splice(e.id, 1)
+    localStorage.setItem('data', JSON.stringify(rawData))
+}
+
 function setTime(e) {
     //get time now
     var d = new Date();
@@ -162,7 +86,7 @@ function formSubmit(e) {
         var name = formInputs.dateNAME.value;
         var date = formInputs.dateMMDDYYYY.value.split("-")
         var time = formInputs.dateTIME.value;
-        var format = formInputs.dateFORMAT.value; //format will look like "DD/MM/YYYY"
+        var format = "MDY"
 
         var dateFormated = []
         format.split("").forEach(function (char) {
@@ -176,14 +100,14 @@ function formSubmit(e) {
         })
         dateFormated = dateFormated.join("/")
         console.log(dateFormated)
-        makeNewCountdown(name, dateFormated, time);
+        var randomTokenID = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         var json = {
             name: name,
             date: dateFormated,
+            dateRaw: date,
             time: time,
-            format: format,
-            time: time,
-            timeMade: Date.now()
+            timeMade: Date.now(),
+            id: randomTokenID
         }
         rawData.push(json)
         console.log(json)
@@ -192,6 +116,7 @@ function formSubmit(e) {
 
         console.log(JSON.stringify(json))
         console.log(JSON.stringify(rawData))
+        localStorage.setItem('data', JSON.stringify(rawData))
 
         //close window
         dateMaker.style.display = 'none';

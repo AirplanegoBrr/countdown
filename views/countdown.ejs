@@ -3,7 +3,10 @@
 
 <head>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="functions.js" defer></script>
     <script src="script.js" defer></script>
+    <script src="timeUpdater.js" defer></script>
+    <script src="login-signup.js" defer></script>
     <link rel="stylesheet" href="style.css">
     <title>Countdown</title>
 </head>
@@ -17,9 +20,6 @@
                 <input type="text" id="dateNAME" name="dateNAME"><br>
                 <label for="dateMMDDYYYY">Date:</label>
                 <input type="date" id="dateMMDDYYYY" name="dateMMDDYYYY"><br>
-                <label for="dateFORMAT" title="We would use the DMY format (just put DMY in the box)">Date
-                    format:</label>
-                <input type="text" id="dateFORMAT" name="dateFORMAT" value="DMY"><br>
                 <label for="dateTIME">Time:</label>
                 <input type="time" id="dateTIME" name="dateTIME">
                 <!-- Make a button to set the time to the time now-->
